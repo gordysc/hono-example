@@ -1,0 +1,15 @@
+meta {
+  name: Logout
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{hostname}}/auth/logout
+  body: none
+  auth: none
+}
+
+script:post-response {
+  bru.setVar("cookie",null);
+}

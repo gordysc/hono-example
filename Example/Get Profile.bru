@@ -1,0 +1,17 @@
+meta {
+  name: Get Profile
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{hostname}}/profile
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const cookie = bru.getVar("cookie");
+  
+  req.setHeader("Cookie", cookie);
+}

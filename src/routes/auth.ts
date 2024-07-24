@@ -1,28 +1,33 @@
 import { Hono } from "hono";
 
-import { logger } from "hono/logger";
-import { requestId } from "hono/request-id";
-import { timing } from "hono/timing";
+import { env } from "hono/adapter";
+import { setCookie, deleteCookie } from "hono/cookie";
+import { sign } from "hono/jwt";
 
 const app = new Hono();
-
-app.use(logger());
-app.use(requestId());
-app.use(timing());
 
 app.post("/login", async (c) => {
   try {
     const body = await c.req.json();
     const { email, password } = body;
     console.log({ email, password });
-    if (email === "admin@example.com" && password === "password") {
-      return c.json({ message: "Login successful" }, 200);
-    } else {
+    if (email !== "admin@example.com" || password !== "password") {
       return c.json({ message: "Login failed" }, 401);
     }
+    const secret = env<{ JWT_SECRET: string }>(c).JWT_SECRET;
+    const token = await sign({ email, role: "admin" }, secret, "HS256");
+
+    setCookie(c, "token", token, { httpOnly: true, secure: true });
+
+    return c.json({});
   } catch (error) {
     return c.json({ message: "Internal server error" }, 500);
   }
+});
+
+app.delete("/logout", async (c) => {
+  deleteCookie(c, "token");
+  return c.json({});
 });
 
 export default app;
