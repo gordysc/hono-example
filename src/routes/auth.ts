@@ -10,10 +10,11 @@ app.post("/login", async (c) => {
   try {
     const body = await c.req.json();
     const { email, password } = body;
-    console.log({ email, password });
+
     if (email !== "admin@example.com" || password !== "password") {
       return c.json({ message: "Login failed" }, 401);
     }
+
     const secret = env<{ JWT_SECRET: string }>(c).JWT_SECRET;
     const token = await sign({ email, role: "admin" }, secret, "HS256");
 
